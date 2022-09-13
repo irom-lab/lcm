@@ -3,6 +3,7 @@
 import sys
 import os
 import lcm
+import numpy as np
 import matplotlib.pyplot as plt
 
 from exlcm import flowdrone_t
@@ -43,6 +44,20 @@ wind_angle_estimate_list = []
 
 start_time = -1.0
 
+current_directory = os.getcwd()
+final_directory = os.path.join(current_directory, "plots/" + sys.argv[1])
+print("final_directory: ",final_directory)
+if not os.path.exists(final_directory):
+   os.makedirs(final_directory)
+
+writeCSV = True # flag TRUE if you want to write to csv
+csv_filename = final_directory + "/" + sys.argv[1] + ".csv" # filename for csv
+
+if writeCSV:
+    with open(csv_filename, "a") as f:   # use 'a' instead of 'ab'
+        f.write("timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res")
+        f.write("\n")
+
 for event in log:
     if event.channel == "FLOWDRONE":
         if start_time == -1:
@@ -76,11 +91,17 @@ for event in log:
         wind_angle_estimate_list.append(msg.wind_angle_estimate)
         print("")
 
-current_directory = os.getcwd()
-final_directory = os.path.join(current_directory, "plots/" + sys.argv[1])
+        if writeCSV:
+            with open(csv_filename, "a") as f:   # use 'a' instead of 'ab'
+                np.savetxt(f, np.array([(event.timestamp-start_time)/1E6,msg.drone_state[0],msg.drone_state[1],msg.drone_state[2], # time s, x,y,z position
+                                        msg.drone_state[7], msg.drone_state[8], msg.drone_state[9], # roll pitch yaw
+                                        msg.drone_state[10], msg.drone_state[11], msg.drone_state[12], # vx, vy, vz
+                                        msg.drone_state[13], msg.drone_state[14], msg.drone_state[15], # p, q, r (body rates)
+                                        msg.body_rate_sp[0], msg.body_rate_sp[1], msg.body_rate_sp[2], # body rate setpoints
+                                        msg.body_rate_residual[0], msg.body_rate_residual[1], msg.body_rate_residual[2], # body rate residual
+                                        msg.thrust_sp, msg.thrust_residual]).reshape(1,21),delimiter=",") # thrust setpoint, thrust residual
+
 print("final_directory: ",final_directory)
-if not os.path.exists(final_directory):
-   os.makedirs(final_directory)
 
 buffer = 5 
 
@@ -127,7 +148,7 @@ fig = plt.figure()
 plt.scatter(timestamp_list, rollrate_list, s=2, c='b', marker="s", label='rollrate')
 plt.scatter(timestamp_list, yawrate_list, s=2, c='r', marker="o", label='yawrate')
 plt.legend(loc='upper left')
-plt.title("Rollrate, Yawrate v Time")
+plt.title("Net Rollrate, Yawrate setpoint v Time")
 plt.xlabel("Time (s)")
 plt.ylabel("Angle Rate (UNITS)")
 plt.savefig(final_directory + "/rollrate_yawrate_plot.png")
@@ -136,7 +157,7 @@ fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_list) - buffer, max(pitchrate_list) + buffer])
 plt.scatter(timestamp_list, pitchrate_list, s=2, c='b', marker="s", label='pitchrate')
 plt.legend(loc='upper left')
-plt.title("Pitch v Time")
+plt.title("Net Pitch setpoint v Time")
 plt.xlabel("Time (s)")
 plt.ylabel("Angle Rate (UNITS)")
 plt.savefig(final_directory + "/pitchrate_plot.png")
@@ -171,11 +192,19 @@ plt.ylabel("Thrust Set Point (UNITS), Thrust Residual (UNITS)")
 plt.savefig(final_directory + "/thurst_sp_thrust_residual_plot.png")
 
 fig = plt.figure()
-#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(wind_magnitude_estimate_list), min(wind_angle_estimate_list)) - buffer, max(max(wind_magnitude_estimate_list), max(wind_angle_estimate_list)) + buffer])
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_magnitude_estimate_list) - buffer, max(wind_magnitude_estimate_list), max(wind_angle_estimate_list) + buffer])
 plt.scatter(timestamp_list, wind_magnitude_estimate_list, s=2, c='b', marker="s", label='wind_magnitude_estimate_list')
-plt.scatter(timestamp_list, wind_angle_estimate_list, s=2, c='r', marker="o", label='wind_angle_estimate_list')
 plt.legend(loc='upper left')
-plt.title("Wind Magnitude Estimate, Wind Angle Estimate v Time")
+plt.title("Wind Magnitude Estimate")
 plt.xlabel("Time (s)")
-plt.ylabel("Wind Magnitude Estimate (UNITS) / Wind Angle Estimate (UNITS)")
-plt.savefig(final_directory + "/wind_magnitude_estimate_wind_angle_estimate_plot.png")
+plt.ylabel("Wind Magnitude Estimate (UNITS)")
+plt.savefig(final_directory + "/wind_magnitude_estimate_plot.png")
+
+fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_angle_estimate_list) - buffer, max(wind_angle_estimate_list), max(wind_angle_estimate_list) + buffer])
+plt.scatter(timestamp_list, wind_angle_estimate_list, s=2, c='b', marker="s", label='wind_angle_estimate_list')
+plt.legend(loc='upper left')
+plt.title("Wind Angle Estimate")
+plt.xlabel("Time (s)")
+plt.ylabel("Wind Angle Estimate (UNITS)")
+plt.savefig(final_directory + "/wind_angle_estimate_plot.png")
