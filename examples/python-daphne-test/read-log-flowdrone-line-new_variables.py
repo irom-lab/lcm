@@ -26,6 +26,16 @@ yaw_list = []
 
 pitch_list = []
 
+vy_list = []
+vz_list = []
+
+vx_list = []
+
+rollrate_actual_list = []
+yawrate_actual_list = []
+
+pitchrate_actual_list = []
+
 rollrate_list = []
 yawrate_list = []
 
@@ -40,13 +50,12 @@ thrust_sp_list = []
 thrust_residual_list = []
 
 wind_magnitude_estimate_list = []
-wind_obs_latest_list = []
 wind_angle_estimate_list = []
 
 start_time = -1.0
 
 current_directory = os.getcwd()
-final_directory = os.path.join(current_directory, "plots/" + sys.argv[1])
+final_directory = os.path.join(current_directory, "velocity_plots/" + sys.argv[1])
 print("final_directory: ",final_directory)
 if not os.path.exists(final_directory):
    os.makedirs(final_directory)
@@ -56,7 +65,7 @@ csv_filename = final_directory + "/" + sys.argv[1] + ".csv" # filename for csv
 
 if writeCSV:
     with open(csv_filename, "a") as f:   # use 'a' instead of 'ab'
-        f.write("timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res,wind_mag,wind_angle,wind_obs")
+        f.write("timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res")
         f.write("\n")
 
 for event in log:
@@ -74,6 +83,12 @@ for event in log:
         roll_list.append(msg.drone_state[7])
         yaw_list.append(msg.drone_state[9])
         pitch_list.append(msg.drone_state[8])
+        vx_list.append(msg.drone_state[10])
+        vy_list.append(msg.drone_state[11])
+        vz_list.append(msg.drone_state[12])
+        rollrate_actual_list.append(msg.drone_state[13])
+        pitchrate_actual_list.append(msg.drone_state[14])
+        yawrate_actual_list.append(msg.drone_state[15])
         print("   thrust_sp = %s" % str(msg.thrust_sp))
         thrust_sp_list.append(msg.thrust_sp)
         print("   thrust_residual = %s" % str(msg.thrust_residual))
@@ -88,8 +103,6 @@ for event in log:
         pitchrate_residual_list.append(msg.body_rate_residual[1])
         print("   wind_magnitude_estimate        = %s" % str(msg.wind_magnitude_estimate))
         wind_magnitude_estimate_list.append(msg.wind_magnitude_estimate)
-        print("   wind_obs_latest        = %s" % str(msg.wind_obs_current[4])) #TODO: update to latest wind obs index
-        wind_obs_latest_list.append(msg.wind_obs_current)
         print("   wind_angle_estimate     = %s" % str(msg.wind_angle_estimate))
         wind_angle_estimate_list.append(msg.wind_angle_estimate)
         print("")
@@ -102,8 +115,7 @@ for event in log:
                                         msg.drone_state[13], msg.drone_state[14], msg.drone_state[15], # p, q, r (body rates)
                                         msg.body_rate_sp[0], msg.body_rate_sp[1], msg.body_rate_sp[2], # body rate setpoints
                                         msg.body_rate_residual[0], msg.body_rate_residual[1], msg.body_rate_residual[2], # body rate residual
-                                        msg.thrust_sp, msg.thrust_residual,
-                                        msg.wind_magnitude_estimate, msg.wind_angle_estimate, msg.wind_obs_current[4]]).reshape(1,24),delimiter=",") # thrust setpoint, thrust residual
+                                        msg.thrust_sp, msg.thrust_residual]).reshape(1,21),delimiter=",") # thrust setpoint, thrust residual
 
 print("final_directory: ",final_directory)
 
@@ -111,8 +123,8 @@ buffer = 5
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(x_list), min(y_list)) - buffer, max(max(x_list), max(y_list)) + buffer])
-plt.scatter(timestamp_list, x_list, s=2, c='b', marker="s", label='x')
-plt.scatter(timestamp_list, y_list, s=2, c='r', marker="o", label='y')
+plt.plot(timestamp_list, x_list, c='b', label='x')
+plt.plot(timestamp_list, y_list, c='r', label='y')
 plt.legend(loc='upper left')
 plt.title("XY v Time")
 plt.xlabel("Time (s)")
@@ -121,7 +133,7 @@ plt.savefig(final_directory + "/xy_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(z_list) - buffer, max(z_list) + buffer])
-plt.scatter(timestamp_list, z_list, s=2, c='b', marker="s", label='z')
+plt.plot(timestamp_list, z_list, c='b', label='z')
 plt.legend(loc='upper left')
 plt.title("Z v Time")
 plt.xlabel("Time (s)")
@@ -130,8 +142,8 @@ plt.savefig(final_directory + "/z_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(roll_list), min(yaw_list)) - buffer, max(max(roll_list), max(yaw_list)) + buffer])
-plt.scatter(timestamp_list, roll_list, s=2, c='b', marker="s", label='roll')
-plt.scatter(timestamp_list, yaw_list, s=2, c='r', marker="o", label='yaw')
+plt.plot(timestamp_list, roll_list, c='b', label='roll')
+plt.plot(timestamp_list, yaw_list, c='r', label='yaw')
 plt.legend(loc='upper left')
 plt.title("Roll, Yaw v Time")
 plt.xlabel("Time (s)")
@@ -140,7 +152,7 @@ plt.savefig(final_directory + "/roll_yaw_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitch_list) - buffer, max(pitch_list) + buffer])
-plt.scatter(timestamp_list, pitch_list, s=2, c='b', marker="s", label='pitch')
+plt.plot(timestamp_list, pitch_list, c='b', label='pitch')
 plt.legend(loc='upper left')
 plt.title("Pitch v Time")
 plt.xlabel("Time (s)")
@@ -148,9 +160,47 @@ plt.ylabel("Angle (UNITS)")
 plt.savefig(final_directory + "/pitch_plot.png")
 
 fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(roll_list), min(yaw_list)) - buffer, max(max(roll_list), max(yaw_list)) + buffer])
+plt.plot(timestamp_list, vy_list, c='b', label='vy')
+plt.plot(timestamp_list, vz_list, c='r', label='vz')
+plt.legend(loc='upper left')
+plt.title("VY, VZ v Time")
+plt.xlabel("Time (s)")
+plt.ylabel("Velocity (m/s)")
+plt.savefig(final_directory + "/vy_vz_plot.png")
+
+fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitch_list) - buffer, max(pitch_list) + buffer])
+plt.plot(timestamp_list, vx_list, c='b', label='vx')
+plt.legend(loc='upper left')
+plt.title("VX v Time")
+plt.xlabel("Time (s)")
+plt.ylabel("Velocity (m/s)")
+plt.savefig(final_directory + "/vx_plot.png")
+
+fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(rollrate_list), min(yawrate_list)) - buffer, max(max(rollrate_list), max(yawrate_list)) + buffer])
-plt.scatter(timestamp_list, rollrate_list, s=2, c='b', marker="s", label='rollrate')
-plt.scatter(timestamp_list, yawrate_list, s=2, c='r', marker="o", label='yawrate')
+plt.plot(timestamp_list, rollrate_actual_list, c='b', label='rollrate_actual')
+plt.plot(timestamp_list, yawrate_actual_list, c='r', label='yawrate_actual')
+plt.legend(loc='upper left')
+plt.title("Rollrate_actual, Yawrate_actual  v Time")
+plt.xlabel("Time (s)")
+plt.ylabel("Angle Rate (radians/s)")
+plt.savefig(final_directory + "/rollrate_actual_yawrate_actual_plot.png")
+
+fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_list) - buffer, max(pitchrate_list) + buffer])
+plt.plot(timestamp_list, pitchrate_actual_list, c='b', label='pitchrate_actual')
+plt.legend(loc='upper left')
+plt.title("Pitchrate_actual v Time")
+plt.xlabel("Time (s)")
+plt.ylabel("Angle Rate (radians/s)")
+plt.savefig(final_directory + "/pitchrate_actual_plot.png")
+
+fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(rollrate_list), min(yawrate_list)) - buffer, max(max(rollrate_list), max(yawrate_list)) + buffer])
+plt.plot(timestamp_list, rollrate_list, c='b', label='rollrate')
+plt.plot(timestamp_list, yawrate_list, c='r', label='yawrate')
 plt.legend(loc='upper left')
 plt.title("Net Rollrate, Yawrate setpoint v Time")
 plt.xlabel("Time (s)")
@@ -159,7 +209,7 @@ plt.savefig(final_directory + "/rollrate_yawrate_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_list) - buffer, max(pitchrate_list) + buffer])
-plt.scatter(timestamp_list, pitchrate_list, s=2, c='b', marker="s", label='pitchrate')
+plt.plot(timestamp_list, pitchrate_list, c='b', label='pitchrate')
 plt.legend(loc='upper left')
 plt.title("Net Pitch setpoint v Time")
 plt.xlabel("Time (s)")
@@ -168,8 +218,8 @@ plt.savefig(final_directory + "/pitchrate_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(rollrate_residual_list), min(yawrate_residual_list)) - buffer, max(max(rollrate_residual_list), max(yawrate_residual_list)) + buffer])
-plt.scatter(timestamp_list, rollrate_residual_list, s=2, c='b', marker="s", label='rollrate_residual')
-plt.scatter(timestamp_list, yawrate_residual_list, s=2, c='r', marker="o", label='yawrate_residual')
+plt.plot(timestamp_list, rollrate_residual_list, c='b', label='rollrate_residual')
+plt.plot(timestamp_list, yawrate_residual_list, c='r', label='yawrate_residual')
 plt.legend(loc='upper left')
 plt.title("Rollrate_residual, Yawrate_residual v Time")
 plt.xlabel("Time (s)")
@@ -178,7 +228,7 @@ plt.savefig(final_directory + "/rollrate_residual_yawrate_residual_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_residual_list) - buffer, max(pitchrate_residual_list) + buffer])
-plt.scatter(timestamp_list, pitchrate_residual_list, s=2, c='b', marker="s", label='pitchrate_residual')
+plt.plot(timestamp_list, pitchrate_residual_list, c='b', label='pitchrate_residual')
 plt.legend(loc='upper left')
 plt.title("Pitch_residual v Time")
 plt.xlabel("Time (s)")
@@ -187,8 +237,8 @@ plt.savefig(final_directory + "/pitchrate_residual_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(min(thrust_sp_list), min(thrust_residual_list)) - buffer, max(max(thrust_sp_list), max(thrust_residual_list)) + buffer])
-plt.scatter(timestamp_list, thrust_sp_list, s=2, c='b', marker="s", label='thrust_sp')
-plt.scatter(timestamp_list, thrust_residual_list, s=2, c='r', marker="o", label='thrust_residual_list')
+plt.plot(timestamp_list, thrust_sp_list, c='b', label='thrust_sp')
+plt.plot(timestamp_list, thrust_residual_list, c='r', label='thrust_residual_list')
 plt.legend(loc='upper left')
 plt.title("Thrust Set Point, Thrust Residual v Time")
 plt.xlabel("Time (s)")
@@ -197,7 +247,7 @@ plt.savefig(final_directory + "/thurst_sp_thrust_residual_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_magnitude_estimate_list) - buffer, max(wind_magnitude_estimate_list), max(wind_angle_estimate_list) + buffer])
-plt.scatter(timestamp_list, wind_magnitude_estimate_list, s=2, c='b', marker="s", label='wind_magnitude_estimate_list')
+plt.plot(timestamp_list, wind_magnitude_estimate_list, c='b', label='wind_magnitude_estimate_list')
 plt.legend(loc='upper left')
 plt.title("Wind Magnitude Estimate")
 plt.xlabel("Time (s)")
@@ -206,7 +256,7 @@ plt.savefig(final_directory + "/wind_magnitude_estimate_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_angle_estimate_list) - buffer, max(wind_angle_estimate_list), max(wind_angle_estimate_list) + buffer])
-plt.scatter(timestamp_list, wind_angle_estimate_list, s=2, c='b', marker="s", label='wind_angle_estimate_list')
+plt.plot(timestamp_list, wind_angle_estimate_list, c='b', label='wind_angle_estimate_list')
 plt.legend(loc='upper left')
 plt.title("Wind Angle Estimate")
 plt.xlabel("Time (s)")
