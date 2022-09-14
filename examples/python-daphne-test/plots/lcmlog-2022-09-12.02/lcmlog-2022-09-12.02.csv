@@ -1,2 +1,6 @@
 timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res
 timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res
+timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res,wind_mag,wind_angle,wind_obs
+timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res,wind_mag,wind_angle,wind_obs
+timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res,wind_mag,wind_angle,wind_obs
+timestamp,x,y,z,roll,pitch,yaw,vx,vy,vz,p,q,r,psp,qsp,rsp,pres,qres,rres,thrust_sp, thrust_res,wind_mag,wind_angle,wind_obs

@@ -56,6 +56,8 @@ wind_obs_latest_list = []
 
 start_time = -1.0
 
+plot_from_start = -1
+
 current_directory = os.getcwd()
 final_directory = os.path.join(current_directory, "velocity_plots/" + sys.argv[1])
 print("final_directory: ",final_directory)
@@ -106,7 +108,7 @@ for event in log:
         print("   wind_magnitude_estimate        = %s" % str(msg.wind_magnitude_estimate))
         wind_magnitude_estimate_list.append(msg.wind_magnitude_estimate)
         print("   wind_obs_latest        = %s" % str(msg.wind_obs_current[4])) #TODO: update to latest wind obs index
-        wind_obs_latest_list.append(msg.wind_obs_current)
+        wind_obs_latest_list.append(msg.wind_obs_current[4])
         print("   wind_angle_estimate     = %s" % str(msg.wind_angle_estimate))
         wind_angle_estimate_list.append(msg.wind_angle_estimate)
         print("")
@@ -157,7 +159,7 @@ plt.savefig(final_directory + "/roll_yaw_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitch_list) - buffer, max(pitch_list) + buffer])
-plt.plot(timestamp_list, pitch_list, c='b', label='pitch')
+plt.plot(timestamp_list[0:plot_from_start], pitch_list[0:plot_from_start], c='b', label='pitch')
 plt.legend(loc='upper left')
 plt.title("Pitch v Time")
 plt.xlabel("Time (s)")
@@ -195,7 +197,7 @@ plt.savefig(final_directory + "/rollrate_actual_yawrate_actual_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_list) - buffer, max(pitchrate_list) + buffer])
-plt.plot(timestamp_list, pitchrate_actual_list, c='b', label='pitchrate_actual')
+plt.plot(timestamp_list[0:plot_from_start], pitchrate_actual_list[0:plot_from_start], c='b', label='pitchrate_actual')
 plt.legend(loc='upper left')
 plt.title("Pitchrate_actual v Time")
 plt.xlabel("Time (s)")
@@ -214,7 +216,7 @@ plt.savefig(final_directory + "/rollrate_yawrate_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_list) - buffer, max(pitchrate_list) + buffer])
-plt.plot(timestamp_list, pitchrate_list, c='b', label='pitchrate')
+plt.plot(timestamp_list[0:plot_from_start], pitchrate_list[0:plot_from_start], c='b', label='pitchrate')
 plt.legend(loc='upper left')
 plt.title("Net Pitch setpoint v Time")
 plt.xlabel("Time (s)")
@@ -233,7 +235,7 @@ plt.savefig(final_directory + "/rollrate_residual_yawrate_residual_plot.png")
 
 fig = plt.figure()
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(pitchrate_residual_list) - buffer, max(pitchrate_residual_list) + buffer])
-plt.plot(timestamp_list, pitchrate_residual_list, c='b', label='pitchrate_residual')
+plt.plot(timestamp_list[0:plot_from_start], pitchrate_residual_list[0:plot_from_start], c='b', label='pitchrate_residual')
 plt.legend(loc='upper left')
 plt.title("Pitch_residual v Time")
 plt.xlabel("Time (s)")
@@ -259,7 +261,17 @@ plt.xlabel("Time (s)")
 plt.ylabel("Wind Magnitude Estimate (UNITS)")
 plt.savefig(final_directory + "/wind_magnitude_estimate_plot.png")
 
+
 fig = plt.figure()
+#plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_magnitude_estimate_list) - buffer, max(wind_magnitude_estimate_list), max(wind_angle_estimate_list) + buffer])
+plt.plot(timestamp_list, wind_obs_latest_list, c='b', label='wind_obs_latest_list')
+plt.legend(loc='upper left')
+plt.title("Wind Observation")
+plt.xlabel("Time (s)")
+plt.ylabel("Wind Observation (UNITS)")
+plt.savefig(final_directory + "/wind_observation_plot.png")
+fig = plt.figure()
+
 #plt.axis([min(timestamp_list) - buffer, max(timestamp_list) + buffer, min(wind_angle_estimate_list) - buffer, max(wind_angle_estimate_list), max(wind_angle_estimate_list) + buffer])
 plt.plot(timestamp_list, wind_angle_estimate_list, c='b', label='wind_angle_estimate_list')
 plt.legend(loc='upper left')
