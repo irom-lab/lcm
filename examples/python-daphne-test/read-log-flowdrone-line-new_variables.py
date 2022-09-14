@@ -52,6 +52,8 @@ thrust_residual_list = []
 wind_magnitude_estimate_list = []
 wind_angle_estimate_list = []
 
+wind_obs_latest_list = []
+
 start_time = -1.0
 
 current_directory = os.getcwd()
@@ -103,6 +105,8 @@ for event in log:
         pitchrate_residual_list.append(msg.body_rate_residual[1])
         print("   wind_magnitude_estimate        = %s" % str(msg.wind_magnitude_estimate))
         wind_magnitude_estimate_list.append(msg.wind_magnitude_estimate)
+        print("   wind_obs_latest        = %s" % str(msg.wind_obs_current[4])) #TODO: update to latest wind obs index
+        wind_obs_latest_list.append(msg.wind_obs_current)
         print("   wind_angle_estimate     = %s" % str(msg.wind_angle_estimate))
         wind_angle_estimate_list.append(msg.wind_angle_estimate)
         print("")
@@ -115,7 +119,8 @@ for event in log:
                                         msg.drone_state[13], msg.drone_state[14], msg.drone_state[15], # p, q, r (body rates)
                                         msg.body_rate_sp[0], msg.body_rate_sp[1], msg.body_rate_sp[2], # body rate setpoints
                                         msg.body_rate_residual[0], msg.body_rate_residual[1], msg.body_rate_residual[2], # body rate residual
-                                        msg.thrust_sp, msg.thrust_residual]).reshape(1,21),delimiter=",") # thrust setpoint, thrust residual
+                                        msg.thrust_sp, msg.thrust_residual,
+                                        msg.wind_magnitude_estimate, msg.wind_angle_estimate, msg.wind_obs_current[4]]).reshape(1,24),delimiter=",") # thrust setpoint, thrust residual
 
 print("final_directory: ",final_directory)
 
