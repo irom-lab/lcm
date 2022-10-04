@@ -264,15 +264,66 @@ offset_wind = 1
 #     plt.ylabel("Velocity (m/s)")
 #     plt.savefig(final_directory + "/roll" + str(j) + "_offset" + str(offset_wind) + ".png")
 
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=BIGGER_SIZE)    # fontsize of the x and y labels
+SMALL_SIZE = 10
+MEDIUM_SIZE = 13
+BIGGER_SIZE = 16
+
+plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
 plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+plt.rc('legend', fontsize=BIGGER_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 plt.rcParams['font.family'] = 'serif'
+plt.rcParams['mathtext.fontset'] = 'cm'
+
+end_timestep_index = next(x for x, val in enumerate(timestamp_list) if val > 38)
+
+df = pd.DataFrame({'B': [item - offset_wind for item in wind_magnitude_estimate_list]})
+roll_10 = df.rolling(10).mean()
+fig = plt.figure()
+plt.plot(timestamp_list[0:end_timestep_index], [abs(item) + offset for item in vx_list][0:end_timestep_index], c='C0', label='$|v_x|$')
+plt.scatter(timestamp_list[0:end_timestep_index], roll_10[0:end_timestep_index], c='C1', s=6, label='$v_{wind}$')
+plt.legend(loc='upper right',frameon=False, prop={'size': 16})
+# plt.legend(bbox_to_anchor=(1.0, 1.0), loc='upper right',frameon=False)
+# plt.title("X Velocity Magnitude in the Forrestal ENU Frame (Gym) [m/s] and Rolling Average Wind Magnitude Estimate with Offset [m/s] over Time")
+plt.xlabel("Time (s)")
+plt.xlim((-1, 40))
+plt.ylabel("Velocity (m/s)")
+plt.ylim((-0.6, 3.0))
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+plt.savefig(final_directory + "/roll10.png", dpi=300, bbox_inches='tight')
+
+df = pd.DataFrame({'B': [item - offset_wind for item in wind_magnitude_estimate_list]})
+roll_20 = df.rolling(20).mean()
+fig = plt.figure()
+plt.plot(timestamp_list[0:end_timestep_index], [abs(item) + offset for item in vx_list][0:end_timestep_index], c='C0', label='velocity magnitude in the x-axis')
+plt.scatter(timestamp_list[0:end_timestep_index], roll_20[0:end_timestep_index], c='C1', s=6, label='wind magnitude estimate')
+plt.legend(bbox_to_anchor=(1.0, 1.0), loc='upper left',frameon=False)
+# plt.title("X Velocity Magnitude in the Forrestal ENU Frame (Gym) [m/s] and Rolling Average Wind Magnitude Estimate with Offset [m/s] over Time")
+plt.title("Velocity Magnitude (m/s) and Wind Magnitude Estimate (m/s) over Time", loc="left")
+plt.xlabel("Time (s)")
+plt.ylabel("Velocity (m/s)")
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+plt.savefig(final_directory + "/roll20.png", dpi=300, bbox_inches='tight')
+
+df = pd.DataFrame({'B': [item for item in wind_angle_estimate_list]})
+roll_20 = df.rolling(20).mean()
+fig = plt.figure()
+plt.plot(timestamp_list[0:end_timestep_index], [item*50 for item in vx_list][0:end_timestep_index], c='C0', label='velocity in the x-axis, scaled x50')
+plt.scatter(timestamp_list[0:end_timestep_index], roll_20[0:end_timestep_index], c='C1', s=6, label='wind angle estimate')
+plt.legend(bbox_to_anchor=(1.0, 1.0), loc='upper left',frameon=False)
+# plt.title("X Velocity Magnitude in the Forrestal ENU Frame (Gym) [m/s] and Rolling Average Wind Magnitude Estimate with Offset [m/s] over Time")
+plt.title("Scaled Velocity Magnitude (m/s) and Wind Angle Estimate (m/s) over Time", loc="left")
+plt.xlabel("Time (s)")
+plt.ylabel("Velocity (m/s), Angle (deg)")
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+plt.savefig(final_directory + "/angleestimate.png", dpi=300, bbox_inches='tight')
 
 fig = plt.figure()
 plt.plot(timestamp_list, z_list, c='b', label='position in the z-axis')
@@ -281,3 +332,11 @@ plt.title("Z Position in the Forrestal ENU Frame (Gym) [m] over Time")
 plt.xlabel("Time (s)")
 plt.ylabel("Position (m)")
 plt.savefig(final_directory + "/z_plot.png")
+
+fig = plt.figure()
+plt.plot(timestamp_list, x_list, c='b', label='position in the x-axis')
+plt.legend(loc='upper left')
+plt.title("X Position in the Forrestal ENU Frame (Gym) [m] over Time")
+plt.xlabel("Time (s)")
+plt.ylabel("Position (m)")
+plt.savefig(final_directory + "/x_plot.png")
