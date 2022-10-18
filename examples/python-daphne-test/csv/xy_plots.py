@@ -70,9 +70,12 @@ def plot_individual_pics():
 
 def plot_subplots():
 
-    # fig, axs = plt.subplots(1, 3, figsize=(18,3))
-    #fig, axs = plt.subplots(1, 3, figsize=(18,5), sharey=True)
-    fig, axs = plt.subplots(3, 1, figsize=(5,18), sharex=True)
+    vertical = False
+
+    if vertical: 
+        fig, axs = plt.subplots(3, 1, figsize=(5,8), sharex=True)
+    else:
+        fig, axs = plt.subplots(1, 3, figsize=(15,3), sharey=True)
 
     wind_aware_files = ["./lcmlog-2022-09-14.65.csv", "./lcmlog-2022-09-14.66.csv", 
                         "./lcmlog-2022-09-14.67.csv", "./lcmlog-2022-09-14.68.csv",
@@ -114,10 +117,14 @@ def plot_subplots():
             # for x, y in zip(x_list, y_list):
             #     axs[test_type_index].scatter(x, y, color=(point_index/(1.0*len(x_list)), 0, 0, 0.5), s=5)
             #     point_index += 1
-            axs[test_type_index].plot(x_list, y_list, c='C'+str(test_type_index))
+            axs[test_type_index].plot(x_list[1:], y_list[1:], c='C'+str(test_type_index))
+            axs[test_type_index].scatter(x_list[0], y_list[0], c='black', zorder=100, marker="x", s=16)
         axs[test_type_index].set_title(all_test_types[test_type_index])
         #axs[test_type_index].set_xlabel("X Position (m)")
-        axs[test_type_index].set_ylabel("Y Position (m)")
+        if test_type_index == 0 or vertical:
+            axs[test_type_index].set_ylabel("Y Position (m)")
+        if test_type_index == 2 or not vertical:
+            axs[test_type_index].set_xlabel("X Position (m)")
         axs[test_type_index].spines['top'].set_visible(False)
         axs[test_type_index].spines['right'].set_visible(False)
 
@@ -129,8 +136,12 @@ def plot_subplots():
         # axs[test_type_index].axis('equal')
         axs[test_type_index].set_aspect('equal')
 
+    # for test_type_index in range(len(all_files)):
+    #     for file in all_files[test_type_index]:
+    #         axs[test_type_index].scatter(x_list[0], y_list[0], c='black')
+
     # axs[0].set_ylabel("Y Position (m)")
-    axs[2].set_xlabel("X Position (m)")
+    # axs[2].set_xlabel("X Position (m)")
 
     # axs[0].set_xlim([-0.2, 0.6])
     # axs[0].set_ylim([-0.2, 0.6])
@@ -142,9 +153,13 @@ def plot_subplots():
     # fig.gca().set_aspect('equal')
     # fig.axis('scaled')
 
-    #plt.subplots_adjust(wspace=0.05, hspace=0)
-    plt.tight_layout()
-    fig.savefig("." + "/subplots_gradient.png", dpi=300, bbox_inches='tight')
+    if vertical: 
+        pass
+    else:
+        plt.subplots_adjust(wspace=0.05, hspace=0)
+
+    fig.savefig("." + "/subplot_with_start.png", dpi=300, bbox_inches='tight')
+    fig.savefig("." + "/subplot_with_start.svg", dpi=300, bbox_inches='tight')
 
 # ----------------------------------------------------------------------------------------------------------------
 
